@@ -4,12 +4,13 @@ on:
   schedule:
     # Heure UTC ! 19h25 UTC = 20h25 à Paris en décembre (UTC+1).
     # GitHub démarre souvent les tâches planifiées avec quelques minutes de
-    # retard, d'où l'avance de 5 minutes. Jours 1 à 24, mois 12 uniquement.
-    - cron: "25 19 1-24 12 *"
+    # retard, d'où l'avance de 5 minutes. Jours 1 à 25, mois 12 uniquement.
+    # (Le script ne fait rien le 25 si tu as supprimé la case bonus.)
+    - cron: "25 19 1-25 12 *"
   workflow_dispatch:
     inputs:
       jour:
-        description: "Case à utiliser pour le test (1 à 24). Vide = celle du jour."
+        description: "Case à utiliser pour le test (1 à 25). Vide = celle du jour."
         required: false
         default: ""
       destinataire:
