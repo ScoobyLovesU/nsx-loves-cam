@@ -50,22 +50,24 @@ function parisToday() {
 }
 
 const today = parisToday();
+// La case bonus du 25 n'a de rappel que si elle existe dans data.js
+const LAST_DAY = SURPRISES.some((s) => Number(s.day) === 25) ? 25 : 24;
 let day;
 
 if (env.JOUR && env.JOUR.trim() !== "") {
   day = Number.parseInt(env.JOUR, 10);
-} else if (today.year === Number(CONFIG.year) && today.month === 12 && today.day <= 24) {
+} else if (today.year === Number(CONFIG.year) && today.month === 12 && today.day <= LAST_DAY) {
   day = today.day;
 } else if (FORCE) {
   day = 1; // test manuel en dehors de décembre : on prend la case 1 comme exemple
   console.log("Hors période : envoi de test avec la case n°1.");
 } else {
-  console.log(`Nous sommes le ${today.day}/${today.month}/${today.year} : hors période (1-24 déc. ${CONFIG.year}). Rien à envoyer.`);
+  console.log(`Nous sommes le ${today.day}/${today.month}/${today.year} : hors période (1-${LAST_DAY} déc. ${CONFIG.year}). Rien à envoyer.`);
   process.exit(0);
 }
 
-if (!Number.isInteger(day) || day < 1 || day > 24) {
-  console.error(`Jour invalide : « ${env.JOUR} » (attendu : 1 à 24).`);
+if (!Number.isInteger(day) || day < 1 || day > LAST_DAY) {
+  console.error(`Jour invalide : « ${env.JOUR} » (attendu : 1 à ${LAST_DAY}).`);
   process.exit(1);
 }
 
@@ -76,6 +78,7 @@ const HINTS = {
   coupon: "un bon cadeau 🎟️",
   quiz: "un petit quiz 🧩",
   indice: "un indice de chasse au trésor 🗝️",
+  audio: "un message vocal 🎙️",
 };
 
 const surprise = SURPRISES.find((s) => Number(s.day) === day);
@@ -85,7 +88,11 @@ const fill = (str = "") =>
     .replaceAll("{indice}", HINTS[surprise?.type] || "une surprise 🎁")
     .replaceAll("{prenom}", CONFIG.name || "");
 
-const subject = fill(R.subject || "🎁 Case n°{jour} : tu l'as ouverte ?");
+const subject = fill(
+  day === 25
+    ? R.subjectBonus || "✨ Une case bonus t'attend…"
+    : R.subject || "🎁 Case n°{jour} : tu l'as ouverte ?"
+);
 const message = fill((R.messages && R.messages[day]) || R.message || "La case du {jour} décembre t'attend ✨");
 const siteUrl = R.siteUrl || "";
 const buttonLabel = R.buttonLabel || "Ouvrir mon calendrier";
@@ -128,7 +135,7 @@ const html = `<!DOCTYPE html>
           </tr>
           <tr>
             <td align="center" style="font-family:Georgia,'Times New Roman',serif;color:#faedc4;font-size:28px;font-weight:bold;line-height:1.2;padding-bottom:24px;">
-              Case n°${day}
+              ${day === 25 ? "Case bonus ✨" : `Case n°${day}`}
             </td>
           </tr>
           <tr>
@@ -148,7 +155,7 @@ const html = `<!DOCTYPE html>
           }
           <tr>
             <td align="center" style="padding-top:18px;font-family:Helvetica,Arial,sans-serif;font-size:12px;color:rgba(245,239,225,0.55);">
-              ${day === 24 ? "Joyeux Noël demain 🎄" : day === 23 ? "Plus qu'une case avant Noël 🎄" : `Plus que ${24 - day} cases avant Noël 🎄`}
+              ${day === 25 ? "Joyeux Noël 🎄" : day === 24 ? "Joyeux Noël demain 🎄" : day === 23 ? "Plus qu'une case avant Noël 🎄" : `Plus que ${24 - day} cases avant Noël 🎄`}
             </td>
           </tr>
         </table>
