@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0a1230">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="24 petites surprises, une par jour.">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Calendrier de l'Avent</title>
+
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎄</text></svg>">
+
+  <!-- Typographies -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=Great+Vibes&family=Playfair+Display:ital,wght@0,600;0,700;1,500&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Neige en arrière-plan -->
+  <canvas id="snow" aria-hidden="true"></canvas>
+
+  <div class="page">
+    <header class="hero">
+      <p class="hero__eyebrow" id="hero-eyebrow">Décembre</p>
+      <h1 class="hero__title">
+        <span class="hero__main" id="title-main">Le Calendrier de l'Avent</span>
+        <span class="hero__name" id="title-name"></span>
+      </h1>
+      <p class="hero__subtitle" id="hero-subtitle"></p>
+
+      <p class="progress" id="progress"></p>
+    </header>
+
+    <main>
+      <div class="grid" id="grid" aria-label="Les 24 cases du calendrier"></div>
+    </main>
+
+    <footer class="footer" id="footer"></footer>
+  </div>
+
+  <!-- Modale -->
+  <div class="modal" id="modal" hidden>
+    <div class="modal__backdrop" data-close></div>
+    <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <button class="modal__close" type="button" data-close aria-label="Fermer">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+      </button>
+      <p class="modal__eyebrow" id="modal-eyebrow"></p>
+      <h2 class="modal__title" id="modal-title"></h2>
+      <div class="modal__body" id="modal-body"></div>
+    </div>
+  </div>
+
+  <!-- Notification -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- Écran d'attente avant le 1er décembre (par-dessus le calendrier flouté) -->
+  <div class="waiting" id="waiting" hidden role="dialog" aria-modal="true" aria-labelledby="waiting-title">
+    <div class="waiting__card">
+      <div class="waiting__gift" aria-hidden="true">🎁</div>
+      <p class="waiting__eyebrow">Encore un peu de patience…</p>
+      <h2 class="waiting__title" id="waiting-title">Ton calendrier s'ouvre dans</h2>
+      <div class="countdown__units">
+        <div class="unit" id="w-unit-days">
+          <span class="unit__value" id="w-days">00</span>
+          <span class="unit__label">jours</span>
+        </div>
+        <div class="unit">
+          <span class="unit__value" id="w-hours">00</span>
+          <span class="unit__label">heures</span>
+        </div>
+        <div class="unit">
+          <span class="unit__value" id="w-minutes">00</span>
+          <span class="unit__label">min</span>
+        </div>
+        <div class="unit">
+          <span class="unit__value" id="w-seconds">00</span>
+          <span class="unit__label">sec</span>
+        </div>
+      </div>
+      <p class="waiting__note" id="waiting-note"></p>
+    </div>
+  </div>
+
+  <!-- Pastille « prochaine case » pendant décembre -->
+  <div class="next-pill" id="next-pill" hidden>
+    <span id="next-pill-icon" aria-hidden="true">⏳</span>
+    <span id="next-pill-text"></span>
+  </div>
+
+  <!-- Panneau de debug (debug: true dans data.js, ou ?debug=true) -->
+  <aside class="debug" id="debug" hidden>
+    <button type="button" class="debug__toggle" id="debug-toggle" aria-expanded="false" aria-controls="debug-panel">🧪 Debug</button>
+    <div class="debug__panel" id="debug-panel" hidden>
+      <p class="debug__warn" id="debug-warn" hidden>⚠ <code>debug: true</code> dans data.js — à repasser à <code>false</code> avant de lui envoyer le lien !</p>
+
+      <p class="debug__title">Cases</p>
+      <label class="debug__field">
+        <span>Date simulée</span>
+        <select id="debug-day"></select>
+      </label>
+      <div class="debug__row">
+        <button type="button" id="debug-open-all">Tout marquer ouvert</button>
+        <button type="button" id="debug-reset">Réinitialiser</button>
+      </div>
+
+      <p class="debug__title">Test du SMS</p>
+      <p class="debug__line" id="debug-sms-phone"></p>
+      <p class="debug__line">Message :</p>
+      <p class="debug__quote" id="debug-sms-body"></p>
+      <p class="debug__line debug__muted" id="debug-sms-format"></p>
+      <code class="debug__raw" id="debug-sms-raw"></code>
+      <div class="debug__row">
+        <a class="debug__primary" id="debug-sms-link" href="#">📱 Envoyer le SMS de test</a>
+        <button type="button" id="debug-sms-copy">Copier le lien</button>
+      </div>
+      <p class="debug__line debug__muted">Sur ordinateur, un lien <code>sms:</code> ne fait souvent rien : teste depuis ton téléphone.</p>
+    </div>
+  </aside>
+
+  <noscript>
+    <p class="noscript">Active JavaScript pour découvrir ton calendrier de l'Avent ✨</p>
+  </noscript>
+
+  <!-- Confettis (CDN léger) -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js" defer></script>
+  <!-- Contenu puis logique -->
+  <script src="data.js" defer></script>
+  <script src="script.js" defer></script>
+</body>
+</html>
