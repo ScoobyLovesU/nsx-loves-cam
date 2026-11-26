@@ -1,0 +1,44 @@
+name: Rappel du calendrier
+
+on:
+  schedule:
+    # Heure UTC ! 19h25 UTC = 20h25 à Paris en décembre (UTC+1).
+    # GitHub démarre souvent les tâches planifiées avec quelques minutes de
+    # retard, d'où l'avance de 5 minutes. Jours 1 à 24, mois 12 uniquement.
+    - cron: "25 19 1-24 12 *"
+  workflow_dispatch:
+    inputs:
+      jour:
+        description: "Case à utiliser pour le test (1 à 24). Vide = celle du jour."
+        required: false
+        default: ""
+      destinataire:
+        description: "Envoyer le test à cette adresse plutôt qu'à elle (mets la tienne)."
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  rappel:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v5
+
+      - name: Installer nodemailer
+        run: npm install --no-save --no-package-lock nodemailer@8
+
+      - name: Envoyer le rappel
+        run: node scripts/rappel.mjs
+        env:
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          MAIL_TO: ${{ secrets.MAIL_TO }}
+          JOUR: ${{ inputs.jour }}
+          DESTINATAIRE: ${{ inputs.destinataire }}
+          FORCE: ${{ github.event_name == 'workflow_dispatch' }}
