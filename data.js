@@ -17,6 +17,13 @@
                      coupon ou indice, révélée après la bonne réponse)
    5. "indice"   → { label, title, clue, hint, note }
                     (hint = coup de pouce caché derrière un bouton, optionnel)
+   6. "audio"    → { title, src, text, signature }
+                    (src = fichier audio local, ex: "assets/audio/jour-16.mp3" ;
+                     formats conseillés : .mp3 ou .m4a)
+
+   CASE BONUS : une entrée avec day: 25 apparaît dans la grille le 25 décembre
+   seulement (elle reste totalement invisible avant). Supprime-la si tu n'en
+   veux pas.
 
    Champ optionnel pour toutes les surprises :
    - teaser : texte affiché sous la zone à gratter (sinon texte par défaut)
@@ -40,19 +47,19 @@ const CONFIG = {
 
   // Titre affiché en haut de la page
   title: "Le Calendrier de l'Avent",
-  name: "Prénom", // ← remplace par son prénom (« de Léa », « d'Emma »… géré automatiquement)
+  name: "Camille", // ← remplace par son prénom (« de Léa », « d'Emma »… géré automatiquement)
   subtitle: "24 petites surprises, une par jour, rien que pour toi.",
 
   // Ton numéro pour réclamer les bons par SMS (format international)
-  phoneNumber: "+33600000000",
+  phoneNumber: "+33609369334",
   // {coupon} sera remplacé par le nom du bon
-  smsTemplate: "Coucou mon cœur 💌 Je réclame mon bon : « {coupon} » ! Tu es dispo quand ? 😘",
+  smsTemplate: "Coucou mon chat 💌 Je réclame mon bon : « {coupon} » ! Tu es dispo quand ? 😘",
 
   // Pourcentage de la zone à gratter à effacer pour révéler la surprise (0.5 = 50 %)
   scratchThreshold: 0.5,
 
   // Clé de sauvegarde dans le navigateur (change-la pour tout remettre à zéro)
-  storageKey: "advent-calendar-2026",
+  storageKey: "nsx-advent-calendar-2026",
 
   // Messages taquins quand elle clique sur une case pas encore disponible
   // {n} = nombre de jours restants · {s} = « s » du pluriel · {jour} = numéro de la case
@@ -85,7 +92,34 @@ const CONFIG = {
   footer: "Fait avec beaucoup d'amour, rien que pour toi",
 
   /* ------------------------------------------------------------------------
-     📧 MAIL DE RAPPEL DU SOIR (envoyé par GitHub Actions, ~20h30)
+     🔔 SONS ET MUSIQUE
+     ------------------------------------------------------------------------ */
+  sounds: {
+    effects: true, // bruitages (grattage, carillon…) activés par défaut
+    // Musique de fond : laisse "" pour la boîte à musique intégrée (« Douce nuit »),
+    // ou mets le chemin d'un fichier, ex: "assets/audio/musique.mp3"
+    musicSrc: "",
+    musicVolume: 0.35, // de 0 à 1
+  },
+
+  /* ------------------------------------------------------------------------
+     📲 ÊTRE PRÉVENU QUAND ELLE OUVRE UNE CASE (via l'appli gratuite ntfy)
+     1. Installe l'appli « ntfy » sur ton téléphone (iOS / Android)
+     2. Abonne-toi au sujet (topic) ci-dessous, sur le serveur ntfy.sh
+     ⚠ Choisis un nom long et difficile à deviner : n'importe qui connaissant
+       ce nom pourrait lire les notifications.
+     ------------------------------------------------------------------------ */
+  notify: {
+    enabled: true,
+    server: "https://ntfy.sh",
+    topic: "nsx-advent-calendar-zdfghb-8787",
+    caseOpened: true, // quand elle ouvre (gratte) une case
+    couponUsed: true, // quand elle utilise un bon
+    albumOpened: true, // quand elle ouvre l'album pour la 1re fois
+  },
+
+  /* ------------------------------------------------------------------------
+     📧 MAIL DE RAPPEL DU SOIR (envoyé par GitHub Actions, ~20h30, du 1er au 25)
      Les identifiants et son adresse mail ne sont PAS ici : ils sont rangés
      dans les « Secrets » du dépôt GitHub (voir .github/workflows/rappel-quotidien.yml).
 
@@ -97,6 +131,7 @@ const CONFIG = {
     siteUrl: "https://ton-pseudo.github.io/calendrier-avent/", // ← l'adresse de ton GitHub Pages
     fromName: "Ton calendrier de l'Avent", // nom affiché comme expéditeur
     subject: "🎁 Case n°{jour} : tu l'as ouverte ?",
+    subjectBonus: "✨ Une case bonus t'attend…", // objet du mail du 25
     // Message par défaut (pour les soirs sans message personnalisé)
     message: "Petit rappel du soir : la case du {jour} décembre t'attend… Si ce n'est pas déjà fait, c'est le moment de gratter ✨\n\nIndice : ce soir, c'est {indice} 😉",
     // Messages personnalisés pour certains soirs (facultatif)
@@ -104,9 +139,10 @@ const CONFIG = {
       1: "C'est le grand jour {prenom} ! La toute première case de ton calendrier est ouverte depuis ce matin… Tu as déjà gratté ? ✨",
       6: "Saint-Nicolas est passé… et il a laissé un indice dans ta case du jour 🧦 Une petite chasse au trésor t'attend !",
       24: "Dernière case, dernière chasse au trésor 🎄 Ouvre-la vite : ton vrai cadeau t'attend quelque part dans la maison…",
+      25: "Joyeux Noël {prenom} 🎄 Psst… une case bonus est apparue sur ton calendrier aujourd'hui. Tu l'as vue ?",
     },
     buttonLabel: "Ouvrir mon calendrier",
-    signature: "Ton chéri",
+    signature: "Noan",
   },
 };
 
@@ -137,7 +173,7 @@ const SURPRISES = [
       J'ai préparé tout ça en pensant à toi, à nous, et à tous ces moments qui font que je t'aime un peu plus chaque jour.
 
       Prête ? Alors c'est parti.`,
-    signature: "Ton chéri",
+    signature: "Noan",
   },
   {
     day: 2,
@@ -172,7 +208,7 @@ const SURPRISES = [
       text: `J'étais tellement stressé que j'ai changé trois fois de t-shirt. Et puis tu es arrivée, tu as souri, et tout le stress s'est envolé.
 
         On a marché pendant des heures sans voir le temps passer. Je crois que c'est ce soir-là que j'ai su.`,
-      signature: "Ton chéri",
+      signature: "Noan",
     },
   },
   {
@@ -272,7 +308,7 @@ const SURPRISES = [
       Tu aurais pu râler. À la place, tu as éclaté de rire et tu m'as pris la main pour courir sous la pluie.
 
       C'est l'un de mes souvenirs préférés. Avec toi, même les galères deviennent de belles histoires.`,
-    signature: "Ton chéri",
+    signature: "Noan",
   },
   {
     day: 14,
@@ -303,11 +339,11 @@ const SURPRISES = [
   },
   {
     day: 16,
-    type: "photo",
-    src: "assets/img/jour-16.jpg",
-    alt: "Coucher de soleil à deux",
-    caption: "Ce coucher de soleil, toi, et moi",
-    date: "Août 2024",
+    type: "audio",
+    title: "Un message rien que pour tes oreilles",
+    src: "assets/audio/jour-16.mp3",
+    text: "Mets tes écouteurs, installe-toi confortablement… et appuie sur lecture 🎧",
+    signature: "Noan",
   },
   {
     day: 17,
@@ -360,7 +396,7 @@ const SURPRISES = [
       text: `Parce que le jour où je l'ai dit pour la première fois, tu sautillais partout en attendant le début du concert.
 
         C'est sorti tout seul, tu as rougi… et c'est resté.`,
-      signature: "Ton chéri",
+      signature: "Noan",
     },
   },
   {
@@ -402,5 +438,21 @@ const SURPRISES = [
       cherche le paquet qui porte ton prénom.`,
     hint: "Sous le sapin, tout au fond, derrière les autres paquets 🎁",
     note: "Joyeux Noël mon amour. Je t'aime.",
+  },
+
+  /* ---------- 🌟 CASE BONUS : apparaît uniquement le 25 décembre ---------- */
+  {
+    day: 25,
+    type: "message",
+    teaser: "Une case bonus, rien que pour toi",
+    title: "Joyeux Noël ❤️",
+    text: `Tu pensais que c'était fini ? Pas tout à fait.
+
+      Merci d'avoir ouvert chaque case, d'avoir gratté, cherché, deviné… Ce calendrier, c'était ma façon de te dire, un peu chaque jour, à quel point je t'aime.
+
+      Ton album de l'Avent t'attend en haut de la page : toutes nos photos et tous mes mots, réunis au même endroit.
+
+      Joyeux Noël, mon amour.`,
+    signature: "Noan",
   },
 ];
