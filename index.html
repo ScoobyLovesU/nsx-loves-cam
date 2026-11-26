@@ -32,7 +32,16 @@
       </h1>
       <p class="hero__subtitle" id="hero-subtitle"></p>
 
+      <!-- Sapin qui se décore au fil des cases ouvertes -->
+      <div class="tree" id="tree"></div>
       <p class="progress" id="progress"></p>
+
+      <div class="hero__actions">
+        <button type="button" class="chip" id="open-wallet">
+          🎟️ Mes bons <span class="chip__badge" id="wallet-badge" hidden>0</span>
+        </button>
+        <button type="button" class="chip" id="open-album" hidden>📖 Notre album</button>
+      </div>
     </header>
 
     <main>
@@ -86,6 +95,12 @@
     </div>
   </div>
 
+  <!-- Sons : musique de fond et bruitages -->
+  <div class="sound-controls">
+    <button type="button" class="sound-btn" id="toggle-music" aria-pressed="false" aria-label="Musique de fond">🎵</button>
+    <button type="button" class="sound-btn" id="toggle-effects" aria-pressed="true" aria-label="Bruitages">🔔</button>
+  </div>
+
   <!-- Pastille « prochaine case » pendant décembre -->
   <div class="next-pill" id="next-pill" hidden>
     <span id="next-pill-icon" aria-hidden="true">⏳</span>
@@ -119,6 +134,13 @@
         <button type="button" id="debug-sms-copy">Copier le lien</button>
       </div>
       <p class="debug__line debug__muted">Sur ordinateur, un lien <code>sms:</code> ne fait souvent rien : teste depuis ton téléphone.</p>
+
+      <p class="debug__title">Notifications (ntfy)</p>
+      <p class="debug__line" id="debug-notify-info"></p>
+      <div class="debug__row">
+        <button type="button" id="debug-notify-test">🔔 Tester la notification</button>
+      </div>
+      <p class="debug__line debug__muted">En mode debug, ouvrir une case ou utiliser un bon n'envoie rien : seul ce bouton envoie.</p>
     </div>
   </aside>
 
